@@ -1,11 +1,11 @@
 const path = require('path')
 const os = require('os')
-const { app, BrowserWindow, Menu, globalShortcut, ipcMain } = require('electron')
+const { app, BrowserWindow, Menu, globalShortcut, ipcMain, shell } = require('electron')
 
 // const imagemin = require('imagemin')
 // const imageminMozjpeg = require('imagemin-mozjpeg')
 // const imageminPngquant = require('imagemin-pngquant')
-//const slash = require('slash')
+// const slash = require('slash')
 
 // import { path } from 'path'
 // import { os } from 'os'
@@ -143,9 +143,30 @@ const menu = [
 ipcMain.on('image:resize', (e, args) => {
     args.dest = path.join(os.homedir(), 'imageshrink')
     console.log(args)
-    //shrinkImage(args)
+    // shrinkImage(args)
 })
 
-async function shrinkImage() {
+async function shrinkImage({ imgPath, quality, dest }) {
+    try {
+        const pngQuality = quality / 100
 
+        const files = await imagemin([slash(imgPath)], {
+            destination: dest,
+            plugins: [
+                imageminMozjpeg({ quality }),
+                imageminPngquant({
+                    quality: [pngQuality, pngQuality]
+                })
+            ]
+        })
+
+        console.log('files:', files);
+
+        shell.openPath(dest)
+
+        mainWindow.webContents.send('image:done')
+    } 
+    catch (error) {
+        console.log(error)
+    }
 }

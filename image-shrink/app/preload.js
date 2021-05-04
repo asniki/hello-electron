@@ -18,6 +18,7 @@ window.addEventListener('DOMContentLoaded', () => {
         outputPath.innerText = path.join(os.homedir(), 'imageShrink')
 
 
+    // on submit
     form.addEventListener('submit', e => {
         e.preventDefault()
 
@@ -29,6 +30,13 @@ window.addEventListener('DOMContentLoaded', () => {
         ipcRenderer.send('image:resize', {
             imgPath,
             quality
+        })
+    })
+
+    // on done
+    ipcRenderer.on('image:done', (e, args) => {
+        M.toast({
+            html: `Image resized to${slider.value}% quality`,
         })
     })
 })
